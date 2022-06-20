@@ -1,5 +1,5 @@
 # comp.el
-Affective Elements for Component Inheritance
+## Affective Elements for Component Inheritance
 
 [`comp.el`](https://github.com/johnmn3/comp.el) uses [`af.fect`](https://github.com/johnmn3/af.fect) produce abstract, _Higher Order Components_ (HOCs) that can serve as concrete components or can be used to derive other HOCs. It is currently _pre-alpha_, bringing in only what is necessary to show how one can use `af.fect` to implement functional inheritance. Over time, I plan to build out the component library.
 
