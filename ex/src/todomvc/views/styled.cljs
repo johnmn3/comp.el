@@ -108,7 +108,7 @@
   {:style/hover {:color "#af5b5e"}
    :style       {:position   "absolute"
                  :right      0
-                 :bottom     2
+                 :bottom     10
                  :width      "40px"
                  :height     "40px"
                  :font-size  "30px"
