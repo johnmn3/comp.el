@@ -23,7 +23,7 @@
   (comp/div
    {:as ::delete-todo :with a/void-todo
     :props styled/delete-todo
-    :on-click #(dispatch [:delete-todo (:id (:todo %))])
+    :on-click #(dispatch [:delete-todo (:id %)])
     :children ["×"]}))
 
 (def todo-display

@@ -8,7 +8,7 @@
                    :on-click (cond mk-on-click
                                    (mk-on-click env)
                                    on-click
-                                   #(on-click env)
+                                   #(on-click %)
                                    :else
                                    identity))}))
 
