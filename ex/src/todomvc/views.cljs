@@ -8,38 +8,6 @@
    [reagent.core :as reagent]
    [re-frame.core :refer [dispatch subscribe]]))
 
-(defn todo-input
-  [{:as env :keys [on-save on-stop]
-    {:keys [title]} :todo}]
-  (let [val  (reagent/atom title)
-        stop #(do (reset! val "")
-                  (when on-stop (on-stop)))
-        save #(let [v (-> @val str str/trim)]
-                (on-save v)
-                (stop))]
-    (fn [_props]
-      (comp/raw-input
-       {:is ::todo-input :with a/void-todo
-        :props (merge styled/todo-input
-                      env
-                      {:auto-focus  true
-                       :value       (or @val "")
-                       :on-blur     save
-                       :on-change   (fn [ev]
-                                      (let [v (-> ev .-target .-value)]
-                                        (reset! val v)))
-                       :on-key-down #(case (.-which %)
-                                       13 (save)
-                                       27 (stop)
-                                       nil)})}))))
-
-(def new-todo
-  (comp/el
-   {:as ::new-todo
-    :props (merge styled/new-todo
-                  {:comp todo-input
-                   :placeholder "What needs to be done?"})}))
-
 (defn new-todo-box []
   (let [all-complete? @(subscribe [:all-complete?])]
     [comp/container styled/new-todo
@@ -52,32 +20,26 @@
                                       (when all-complete?
                                         {:color "#737373"}))}]]
      [comp/item {:xs 11}
-      [new-todo {:on-save #(when (seq %)
-                             (dispatch [:add-todo %]))}]]]))
+      [c/new-todo]]]))
 
 (defn todo-item []
   (let [editing (reagent/atom false)
         hover-state (reagent/atom false)]
-    (fn [{{:as todo :keys [id]} :todo}]
+    (fn [{{:as todo :keys [id title]} :todo}]
       [comp/list-item
        (merge styled/todo-item
               {:on-mouse-over #(reset! hover-state true)
                :on-mouse-out #(reset! hover-state false)})
        [c/complete-check todo]
        (if-not @editing
-         [c/todo-display (assoc todo :editing editing)]
-         [new-todo
-          (merge styled/edit-todo
-                 {:todo todo
-                  :placeholder ""
-                  :on-save #(if (seq %)
-                              (dispatch [:save id %])
-                              (dispatch [:delete-todo id]))
-                  :on-stop #(reset! editing false)})])
+         [c/todo-display (assoc todo :editing editing)
+          title]
+         [(c/existing-todo
+           {:as ::edit-existing-todo
+            :props {:todo todo
+                    :editing editing}})])
        (when @hover-state
-         [c/delete-todo
-          {:todo todo
-           :is id}])])))
+         [c/delete-todo {:is id}])])))
 
 (def todo-list
   (comp/list-items
@@ -116,29 +78,8 @@
        (when (pos? done)
          "Clear completed")]]]))
 
-(def body-style
-  {:padding "0 auto"
-   :font "14px 'Helvetica Neue', Helvetica, Arial, sans-serif"
-   :line-height "1.4em"
-   :background "#f5f5f5"
-   :color "#4d4d4d"
-   :min-width "230px"
-   :max-width "550px"
-   :margin "0 auto"
-  ;;  :margin 0
-   :-webkit-font-smoothing "antialiased"
-   :-moz-font-smoothing "antialiased"
-   :font-smoothing "antialiased"
-   :font-weight 300})
-
-(def html-style
-  {:padding 0
-   :margin 0
-   :background "#f5f5f5"})
-
 (defn todo-app []
-  ;[:html {:style html-style}]
-  [:body {:style body-style}
+  [:div {:style styled/body-style}
    [comp/box {:style {:padding-top 50}}
     [c/todo-header-title "todos"]
     [comp/paper {:style {:padding-top 16

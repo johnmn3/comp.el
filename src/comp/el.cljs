@@ -13,19 +13,13 @@
    [comp.styles :as s]
    [comp.props :as p]))
 
-(defn form-1-or-2 [{:as _env :keys [props args]} & _effect-args]
+(defn form-1-or-2 [{:as env :keys [pre-state props args]} & _effect-args]
   (let [props (or props {})
         component (:comp props :<>)
-        pre-state (:pre-state props)
         [props args] (if (map? (first args))
                        [(merge props (first args)) (rest args)]
-                       [props args])
-        new-args (if-not pre-state
-                   (into [component (dissoc props :comp)] args)
-                   (fn [form-2-props]
-                     (let [new-form-2-props (-> props (merge form-2-props) pre-state (dissoc :pre-state))]
-                       (into [component new-form-2-props] args))))]
-    new-args))
+                       [props args])]
+    (into [component (dissoc props :comp)] args)))
 
 (def el
   (af/fect
@@ -36,10 +30,11 @@
   (el
    {:as ::div
     :props {:comp :div}}))
-#_(def input
-    (el
-     {:as ::input
-      :props {:comp mui-text-field/text-field}}))
+
+;; (def input
+;;   (el
+;;    {:as ::input
+;;     :props {:comp mui-text-field/text-field}}))
 
 (def raw-input
   (el

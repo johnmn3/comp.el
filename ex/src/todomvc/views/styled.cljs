@@ -177,3 +177,17 @@
            :text-shadow "0 1px 0 rgba(255, 255, 255, 0.5)"
            :text-align  "center"
            :line-height "1"}})
+
+(def body-style
+  {:padding "0 auto"
+   :font "14px 'Helvetica Neue', Helvetica, Arial, sans-serif"
+   :line-height "1.4em"
+   :background "#f5f5f5"
+   :color "#4d4d4d"
+   :min-width "230px"
+   :max-width "550px"
+   :margin "0 auto"
+   :-webkit-font-smoothing "antialiased"
+   :-moz-font-smoothing "antialiased"
+   :font-smoothing "antialiased"
+   :font-weight 300})

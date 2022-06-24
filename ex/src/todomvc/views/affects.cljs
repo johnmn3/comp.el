@@ -5,7 +5,7 @@
 (def void-todo
   (void
    {:as ::void-todo
-    :props/void [:id :on-save :on-stop :title :done :selected?]}))
+    :props/void [:id :editing :on-save :on-stop :title :done :selected? :new?]}))
 
 (def selected?
   (props

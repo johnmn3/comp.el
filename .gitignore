@@ -16,3 +16,5 @@ pom.xml.asc
 .clj-kondo/
 .calva/
 node_modules
+docs/js/cljs-runtime
+docs/js/manifest.edn
