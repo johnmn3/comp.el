@@ -9,6 +9,8 @@
 
 The obligitory todomvc screenshot: <img width="400" alt="Screen Shot 2022-06-20 at 2 07 40 PM" src="https://user-images.githubusercontent.com/127271/174676451-fff0dfa6-6479-4763-b3f4-285c37286830.png">
 
+You can try it out live here: https://johnmn3.github.io/comp.el/
+
 There's a tiny bit of CSS in the index.html file, to get the html and body styled, but the rest is all in CLJS. Radiant allows you to express CSS media queries, pseudo-selectors and animation keyframes all in-line - pretty awesome!
 
 Todomvc isn't actually a large enough application to necessitate HOCs and functional inheritance. My desire to create `af.fect` originally came from building fairly large frontends in Re-frame and finding a proliferation of concrete implementations of similar-but-slightly-different components. I started to get annoyed by how similar these large, complex components were and began thinking about how I might go about abstracting out their commonalities.
