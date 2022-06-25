@@ -23,15 +23,13 @@
 
 (def delete-todo
   (comp/div
-   {:as ::delete-todo :with a/void-todo
-    :props styled/delete-todo
-    :on-click #(dispatch [:delete-todo (:is %)])
-    :children ["×"]}))
+    {:as ::delete-todo :with [styled/delete-todo a/void-todo]
+     :on-click #(dispatch [:delete-todo (:is %)])}
+   "×"))
 
 (def todo-display
   (comp/label
-   {:as ::todo-display :with a/void-todo
-    :props styled/todo-display
+   {:as ::todo-display :with [styled/todo-display a/void-todo]
     :props/ef (fn [{:as todo :keys [editing]}]
                 (merge {:on-double-click #(reset! editing true)}
                        (when (:done todo)
@@ -39,10 +37,9 @@
 
 (def todo-input
   (comp/raw-input
-   {:as ::todo-input :with [a/void-todo]
-    :props styled/todo-input
-    :props/void [:af-state]
-    :props/ef (fn [{:as props :keys [on-save on-stop af-state]}]
+   {:as ::todo-input :with [styled/todo-input a/void-todo]
+    :props/void :af-state
+    :props/ef (fn [{:keys [on-save on-stop af-state]}]
                 (let [stop #(do (reset! af-state "")
                                 (when on-stop (on-stop)))
                       save #(do (on-save (some-> af-state deref str str/trim))
@@ -58,17 +55,15 @@
 
 (def new-todo
   (todo-input
-   {:as ::new-todo
-    :props (merge styled/new-todo
-                  {:placeholder "What needs to be done?"
-                   :af-state (r/atom nil)
-                   :on-save #(when (seq %)
-                               (dispatch [:add-todo %]))})}))
+   {:as ::new-todo :with styled/new-todo
+    :props {:placeholder "What needs to be done?"
+            :af-state (r/atom nil)
+            :on-save #(when (seq %)
+                        (dispatch [:add-todo %]))}}))
 
 (def existing-todo
   (todo-input
-   {:as ::existing-todo
-    :props styled/edit-todo
+   {:as ::existing-todo :with styled/edit-todo
     :props/af (fn [{:keys [editing]
                     {:keys [id title]} :todo}]
                 {:af-state (r/atom title)
@@ -79,28 +74,26 @@
 
 (def todo-header-title
   (comp/box
-   {:as ::todo-header-title
-    :props styled/todo-header-title}))
+   {:as ::todo-header-title :with styled/todo-header-title}))
 
 (def filter-anchor
   (comp/a
-   {:as ::a :with [a/selected?]
-    :props (merge styled/filter-anchor
-                  {:on-selected #(update % :style
-                                         assoc :border-color
-                                         "rgba(175, 47, 47, 0.2)")})}))
+   {:as ::a :with [styled/filter-anchor a/selected?]
+    :props {:on-selected #(update % :style
+                                  assoc :border-color
+                                  "rgba(175, 47, 47, 0.2)")}}))
 
 (def filter-all
   (filter-anchor
-   {:as :all :with a/void-todo
-    :children ["All"]}))
+   {:as :all :with a/void-todo}
+   "All"))
 
 (def filter-active
   (filter-anchor
-   {:as :active :with a/void-todo
-    :children ["Active"]}))
+   {:as :active :with a/void-todo}
+   "Active"))
 
 (def filter-done
   (filter-anchor
-   {:as :done :with a/void-todo
-    :children ["Completed"]}))
+   {:as :done :with a/void-todo}
+   "Completed"))

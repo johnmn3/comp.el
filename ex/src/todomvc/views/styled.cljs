@@ -1,4 +1,6 @@
-(ns todomvc.views.styled)
+(ns todomvc.views.styled
+  (:require
+   [comp.el :as comp]))
 
 (defn deep-merge [& maps]
   (apply merge-with
@@ -23,14 +25,23 @@
    :font-weight 300
    :color       "#e6e6e6"})
 
-(def todo-input
-  {:style {:border         0
-           :width          "100%"
-           :padding-left   20
-           :padding-top    8
-           :padding-bottom 10}})
+;; (def todo-input
+;;   {:style {:border         0
+;;            :width          "100%"
+;;            :padding-left   20
+;;            :padding-top    8
+;;            :padding-bottom 10}})
 
-(def new-todo
+(def todo-input
+  (comp/el
+   {:as ::todo-input
+    :props {:style {:border         0
+                    :width          "100%"
+                    :padding-left   20
+                    :padding-top    8
+                    :padding-bottom 10}}}))
+
+(def new-todo-styles
   {:style/-webkit-input-placeholder placehoder-styles
    :style/-moz-placeholder          placehoder-styles
    :style/input-placeholder         placehoder-styles
@@ -42,20 +53,28 @@
                                             :padding-bottom 4
                                             :box-shadow     "inset 3 -2px 1px rgba(0,0,0,0.03)"})})
 
+(def new-todo
+  (comp/el
+   {:as ::new-todo
+    :props new-todo-styles}))
+
 (def edit-todo
-  {:style/-webkit-input-placeholder placehoder-styles
-   :style/-moz-placeholder          placehoder-styles
-   :style/input-placeholder         placehoder-styles
-   :style                           (merge new-todo-common
-                                           {:width          "100%"
-                                            :font-weight    300
-                                            :border         0
-                                            :color          "#0f0f0f"
-                                            :font           "16px 'Helvetica Neue', Helvetica, Arial, sans-serif"
-                                            :padding-top    12
-                                            :padding-left   20
-                                            :padding-bottom 13
-                                            :box-shadow     "inset 3 -2px 1px rgba(0,0,0,0.03)"})})
+  (comp/el
+   {:as ::edit-todo
+    :props {:style/-webkit-input-placeholder placehoder-styles
+            :style/-moz-placeholder          placehoder-styles
+            :style/input-placeholder         placehoder-styles
+            :style
+            (merge new-todo-common
+                   {:width          "100%"
+                    :font-weight    300
+                    :border         0
+                    :color          "#0f0f0f"
+                    :font           "16px 'Helvetica Neue', Helvetica, Arial, sans-serif"
+                    :padding-top    12
+                    :padding-left   20
+                    :padding-bottom 13
+                    :box-shadow     "inset 3 -2px 1px rgba(0,0,0,0.03)"})}}))
 
 (def circle
   {:style {:width              "1.7em"
@@ -105,29 +124,33 @@
            :top              "20px"}})
 
 (def delete-todo
-  {:style/hover {:color "#af5b5e"}
-   :style       {:position   "absolute"
-                 :right      0
-                 :bottom     10
-                 :width      "40px"
-                 :height     "40px"
-                 :font-size  "30px"
-                 :color      "#cc9a9a"
-                 :transition "color 0.2s ease-out"}})
+  (comp/el
+   {:as ::delete-todo
+    :props {:style/hover {:color "#af5b5e"}
+            :style       {:position   "absolute"
+                          :right      0
+                          :bottom     10
+                          :width      "40px"
+                          :height     "40px"
+                          :font-size  "30px"
+                          :color      "#cc9a9a"
+                          :transition "color 0.2s ease-out"}}}))
 
 (def todo-display
-  (deep-merge
-   new-todo
-   {:style (merge
-            new-todo-common
-            {:color          "#4d4d4d"
-             :font           "14px 'Helvetica Neue', Helvetica, Arial, sans-serif"
-             :font-weight    300
-             :width          "100%"
-             :padding-top    12
-             :padding-bottom 13
-             :padding-left   20
-             :transition     "color 0.4s"})}))
+  (comp/el
+   {:as ::todo-display
+    :props (deep-merge
+            new-todo-styles
+            {:style (merge
+                     new-todo-common
+                     {:color          "#4d4d4d"
+                      :font           "14px 'Helvetica Neue', Helvetica, Arial, sans-serif"
+                      :font-weight    300
+                      :width          "100%"
+                      :padding-top    12
+                      :padding-bottom 13
+                      :padding-left   20
+                      :transition     "color 0.4s"})})}))
 
 (def todo-item
   {:style {:padding-left  8
@@ -138,23 +161,30 @@
            :color           "#d9d9d9"}})
 
 
-(def todo-header-title
+(def todo-header-title-style
   {:style {:padding-bottom 50
            :text-align     "center"
            :font-weight    100
            :font-size      "100px"
            :color          "rgba(175, 47, 47, 0.15)"}})
 
+(def todo-header-title
+  (comp/el
+   {:as ::todo-display
+    :props todo-header-title-style}))
+
 (def filter-anchor
-  {:style/hover {:border-color "rgba(175, 47, 47, 0.1)"}
-   :style       {:color           "inherit"
-                 :cursor          "pointer"
-                 :margin          "3px"
-                 :padding         "3px 7px"
-                 :text-decoration "none"
-                 :border          "1px solid transparent"
-                 :border-color    "rgba(175, 47, 47, 0.0)"
-                 :border-radius   "3px"}})
+  (comp/el
+   {:as ::filter-anchor
+    :props {:style/hover {:border-color "rgba(175, 47, 47, 0.1)"}
+            :style       {:color           "inherit"
+                          :cursor          "pointer"
+                          :margin          "3px"
+                          :padding         "3px 7px"
+                          :text-decoration "none"
+                          :border          "1px solid transparent"
+                          :border-color    "rgba(175, 47, 47, 0.0)"
+                          :border-radius   "3px"}}}))
 
 (def footer-controls
   {:style {:color         "#777"

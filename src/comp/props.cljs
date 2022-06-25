@@ -28,23 +28,37 @@
     child-props-ef :props/ef}]
   (merge {:props (merge-with-styles parent-props child-props)}
          (when (and parent-props-void child-props-void)
-           {:props/void (vec (set (concat parent-props-void child-props-void)))})
+           {:props/void (vec (set (concat parent-props-void (af/muff child-props-void))))})
          (when (and parent-props-af child-props-af)
            {:props/af (comp child-props-af parent-props-af)})
          (when (and parent-props-ef child-props-ef)
            {:props/ef (comp child-props-ef parent-props-ef)})))
+
+(defn wrap-fns [env args]
+  (->> args
+       (mapv (fn [arg]
+               (if (fn? arg)
+                 (with-meta
+                   (fn [_env]
+                     (arg env))
+                   {:ef/runnable? true})
+                 arg)))))
 
 (def props
   (void
    {:as ::props
     :join props-joiner
     :af (fn [{:as env
-              :keys [props]
+              :keys [props children args]
               props-af :props/af}]
-          (when props-af
-            {:props (merge-with-styles
-                     props
-                     (props-af props env))}))
+          (merge {}
+                 (when (seq args)
+                   {:children (vec (concat (or children []) (wrap-fns env args)))
+                    :args []})
+                 (when props-af
+                   {:props (merge-with-styles
+                            props
+                            (props-af props env))})))
     :ef (fn [{:as env
               :keys [props args]
               props-ef :props/ef

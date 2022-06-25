@@ -1,16 +1,14 @@
 (ns todomvc.views
   (:require
-   [clojure.string :as str]
    [comp.el :as comp]
    [todomvc.views.comps :as c]
-   [todomvc.views.affects :as a]
    [todomvc.views.styled :as styled]
    [reagent.core :as reagent]
    [re-frame.core :refer [dispatch subscribe]]))
 
 (defn new-todo-box []
   (let [all-complete? @(subscribe [:all-complete?])]
-    [comp/container styled/new-todo
+    [comp/container styled/new-todo-styles
      [comp/item {:xs 1
                  :on-click #(dispatch [:complete-all-toggle])}
       [comp/arrow-down {:font-size "large"
@@ -43,13 +41,12 @@
 
 (def todo-list
   (comp/list-items
-   {:as ::todo-list
-    :children
-    #(let [visible-todos @(subscribe [:visible-todos])]
-       (->> visible-todos
-            (mapv (fn [x] [todo-item {:todo x}]))
-            (interpose [comp/divider])
-            (into [[comp/divider]])))}))
+   {:as ::todo-list}
+   #(let [visible-todos @(subscribe [:visible-todos])]
+      (->> visible-todos
+           (mapv (fn [x] [todo-item {:todo x}]))
+           (interpose [comp/divider])
+           (into [[comp/divider]])))))
 
 (defn footer-selectors []
   (let [showing @(subscribe [:showing])]
