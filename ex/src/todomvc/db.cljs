@@ -1,6 +1,7 @@
 ;; copied directly from https://github.com/day8/re-frame/tree/master/examples/todomvc
 (ns todomvc.db
-  (:require [cljs.reader]
+  (:require [perc.core]
+            [cljs.reader]
             [cljs.spec.alpha :as s]
             [re-frame.core :as re-frame]))
 
@@ -78,10 +79,9 @@
 ;;
 (re-frame/reg-cofx
  :local-store-todos
- (fn [cofx _]
       ;; put the localstore todos into the coeffect under :local-store-todos
-   (assoc cofx :local-store-todos
+ #%(assoc % :local-store-todos
              ;; read in todos from localstore, and process into a sorted map
           (into (sorted-map)
                 (some->> (.getItem js/localStorage ls-key)
-                         (cljs.reader/read-string))))))    ;; EDN map -> map
+                         (cljs.reader/read-string)))))    ;; EDN map -> map

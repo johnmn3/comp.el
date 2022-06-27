@@ -116,8 +116,8 @@
   check-spec-interceptor]          ;; after event handler runs, check app-db for correctness. Does it still match Spec?
 
   ;; the event handler (function) being registered
- (fn [{:keys [_db local-store-todos]} _]                  ;; take 2 values from coeffects. Ignore event vector itself.
-   {:db (assoc default-db :todos local-store-todos)}))   ;; all hail the new state to be put in app-db
+ #%{:db (assoc default-db :todos %:local-store-todos)})  ;; take 2 values from coeffects. Ignore event vector itself.
+                                                         ;; all hail the new state to be put in app-db
 
 
 ;; usage:  (dispatch [:set-showing  :active])
@@ -130,8 +130,7 @@
  [check-spec-interceptor]       ;; after event handler runs, check app-db for correctness. Does it still match Spec?
 
   ;; handler
- (fn [db [_ new-filter-kw]]     ;; new-filter-kw is one of :all, :active or :done
-   (assoc db :showing new-filter-kw)))
+ #%(assoc % :showing %2%2))     ;; new-filter-kw is one of :all, :active or :done
 
 ;; NOTE: below is a rewrite of the event handler (above) using a `path` Interceptor
 ;; You'll find it illuminating to compare this rewrite with the original.
@@ -159,8 +158,7 @@
   ;; be the value at the path `[:showing]` within db.
   ;; Equally the value returned will be the new value for that path
   ;; within app-db.
-   (fn [old-showing-value [_ new-showing-value]]
-     new-showing-value))                  ;; return new state for the path
+   #% %2%2)       ;; return new state for the path
 
 
 ;; usage:  (dispatch [:add-todo  "a description string"])
@@ -178,47 +176,39 @@
   ;; And, further, it means the event handler returns just the value to be
   ;; put into the `[:todos]` path, and not the entire `db`.
   ;; So, again, a path interceptor acts like clojure's `update-in`
- (fn [todos [_ text]]
-   (let [id (allocate-next-id todos)]
-     (assoc todos id {:id id :title text :done false}))))
+ #%(let [id (allocate-next-id %)]
+     (assoc % id {:id id :title %2%2 :done false})))
 
 
 (reg-event-db
  :toggle-done
  todo-interceptors
- (fn [todos [_ id]]
-   (update-in todos [id :done] not)))
+ #%(update-in % [%2%2 :done] not))
 
 
 (reg-event-db
  :save
  todo-interceptors
- (fn [todos [_ id title]]
-   (assoc-in todos [id :title] title)))
+ #%(assoc-in % [%2%2 :title] %2%3))
 
 
 (reg-event-db
  :delete-todo
  todo-interceptors
- (fn [todos [_ id]]
-   (dissoc todos id)))
+ #%(dissoc % %2%2))
 
 
 (reg-event-db
  :clear-completed
  todo-interceptors
- (fn [todos _]
-   (let [done-ids (->> (vals todos)         ;; which todos have a :done of true
-                       (filter :done)
-                       (map :id))]
-     (reduce dissoc todos done-ids))))      ;; delete todos which are done
+ #%(reduce dissoc % (->> %vals              ;; delete todos which are done
+                         (filter :done)     ;; which todos have a :done of true
+                         (map :id))))
 
 
 (reg-event-db
  :complete-all-toggle
  todo-interceptors
- (fn [todos _]
-   (let [new-done (not-every? :done (vals todos))]   ;; work out: toggle true or false?
-     (reduce #(assoc-in %1 [%2 :done] new-done)
-             todos
-             (keys todos)))))
+ #%(->> %keys     ;; work out: toggle true or false?
+        (reduce #%%(assoc-in %% [%%2 :done] (not-every? :done %vals))
+                %)))
