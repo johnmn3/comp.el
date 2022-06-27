@@ -77,35 +77,41 @@
                     :box-shadow     "inset 3 -2px 1px rgba(0,0,0,0.03)"})}}))
 
 (def circle
-  {:style {:width              "1.7em"
-           :height             "1.6em"
-           :background-color   "white"
-           :border-radius      "50%"
-           :vertical-align     "middle"
-           :border             "1px solid #eee"
-           :appearance         "none"
-           :-webkit-appearance "none"
-           :outline            "none"
-           :cursor             "pointer"
-           :font-size          "large"}})
+  (comp/el
+   {:as ::circle
+    :props {:style {:width              "1.7em"
+                    :height             "1.6em"
+                    :background-color   "white"
+                    :border-radius      "50%"
+                    :vertical-align     "middle"
+                    :border             "1px solid #eee"
+                    :appearance         "none"
+                    :-webkit-appearance "none"
+                    :outline            "none"
+                    :cursor             "pointer"
+                    :font-size          "large"}}}))
 
 (def checked-circle
-  {:style {:width              "1.7em"
-           :height             "1.6em"
-           :background-color   "white"
-           :border-radius      "50%"
-           :vertical-align     "middle"
-           :border             "1px solid #ddd"
-           :appearance         "none"
-           :-webkit-appearance "none"
-           :outline            "none"
-           :cursor             "pointer"
-           :font-size          "large"}})
+  (comp/el
+   {:as ::checked-circle
+    :props {:style {:width              "1.7em"
+                    :height             "1.6em"
+                    :background-color   "white"
+                    :border-radius      "50%"
+                    :vertical-align     "middle"
+                    :border             "1px solid #ddd"
+                    :appearance         "none"
+                    :-webkit-appearance "none"
+                    :outline            "none"
+                    :cursor             "pointer"
+                    :font-size          "large"}}}))
 
-(def check
-  {:style {:-ms-transform     "rotate(45deg)"; /* IE 9 */
-           :-webkit-transform "rotate(45deg)"; /* Chrome, Safari, Opera */
-           :transform         "rotate(45deg)"}})
+(def checked
+  (comp/el
+   {:as ::checked :with checked-circle
+    :props {:style {:-ms-transform     "rotate(45deg)"; /* IE 9 */
+                    :-webkit-transform "rotate(45deg)"; /* Chrome, Safari, Opera */
+                    :transform         "rotate(45deg)"}}}))
 
 (def check-leg
   {:style {:position         "absolute"
@@ -187,18 +193,20 @@
                           :border-radius   "3px"}}}))
 
 (def footer-controls
-  {:style {:color         "#777"
-           :padding       "10px 15px"
-           :padding-left  0
-           :padding-right 0
-           :height        "20px"
-           :text-align    "center"
-           :border-top    "1px solid #e6e6e6"
-           :box-shadow    (str "0 1px 1px rgba(0, 0, 0, 0.2), "
-                               "0 8px 0 -3px #f6f6f6, "
-                               "0 9px 1px -3px rgba(0, 0, 0, 0.2), "
-                               "0 16px 0 -6px #f6f6f6, "
-                               "0 17px 2px -6px rgba(0, 0, 0, 0.2)")}})
+  (comp/el
+   {:as ::footer-controls
+    :props {:style {:color         "#777"
+                    :padding       "10px 15px"
+                    :padding-left  0
+                    :padding-right 0
+                    :height        "20px"
+                    :text-align    "center"
+                    :border-top    "1px solid #e6e6e6"
+                    :box-shadow    (str "0 1px 1px rgba(0, 0, 0, 0.2), "
+                                        "0 8px 0 -3px #f6f6f6, "
+                                        "0 9px 1px -3px rgba(0, 0, 0, 0.2), "
+                                        "0 16px 0 -6px #f6f6f6, "
+                                        "0 17px 2px -6px rgba(0, 0, 0, 0.2)")}}}))
 
 (def todo-app-footer
   {:style {:margin      "65px auto 0"

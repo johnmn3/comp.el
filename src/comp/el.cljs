@@ -31,6 +31,11 @@
    {:as ::div
     :props {:comp :div}}))
 
+(def span
+  (el
+   {:as ::span
+    :props {:comp :span}}))
+
 ;; (def input
 ;;   (el
 ;;    {:as ::input

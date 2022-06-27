@@ -13,19 +13,17 @@
 ;; Why?  It is an efficiency thing. Every Layer 2 subscription will rerun any time
 ;; that `app-db` changes (in any way). As a result, we want Layer 2 to be trivial.
 ;;
-(reg-sub
- :showing          ;; usage:   (subscribe [:showing])
- (fn [db _]        ;; db is the (map) value stored in the app-db atom
-   (:showing db))) ;; extract a value from the application state
+(reg-sub :showing #% %:showing)
+                   ;; usage:   (subscribe [:showing])
+                   ;; the first parameter, db is the (map) value stored in the app-db atom
+                   ;; extract a value from the application state
 
 
 ;; Next, the registration of a similar handler is done in two steps.
 ;; First, we `defn` a pure handler function.  Then, we use `reg-sub` to register it.
 ;; Two steps. This is different to that first registration, above, which was done
 ;; in one step using an anonymous function.
-(defn sorted-todos
-  [db _]
-  (:todos db))
+(def sorted-todos #% %:todos)
 (reg-sub :sorted-todos sorted-todos)    ;; usage: (subscribe [:sorted-todos])
 
 ;; -------------------------------------------------------------------------------------
@@ -67,8 +65,7 @@
   ;; being the two values supplied in the originating `(subscribe X Y)`.
   ;; X will be the query vector and Y is an advanced feature and out of scope
   ;; for this explanation.
- (fn [_query-v _]
-   (subscribe [:sorted-todos]))    ;; returns a single input signal
+ #%(subscribe [:sorted-todos])     ;; returns a single input signal
 
   ;; This 2nd fn does the computation. Data values in, derived data out.
   ;; It is the same as the two simple subscription handlers up at the top.
@@ -80,8 +77,7 @@
   ;;  - the input signals (a single item, a vector or a map)
   ;;  - the query vector supplied to query-v  (the query vector argument
   ;; to the "subscribe") and the 3rd one is for advanced cases, out of scope for this discussion.
- (fn [sorted-todos _query-v _]
-   (vals sorted-todos)))
+ #% %vals)
 
 ;; So here we define the handler for another intermediate node.
 ;; This time the computation involves two input signals.
@@ -94,17 +90,15 @@
   ;; Signal Function
   ;; Tells us what inputs flow into this node.
   ;; Returns a vector of two input signals (in this case)
- (fn [_query-v _]
-   [(subscribe [:todos])
-    (subscribe [:showing])])
+ #%[(subscribe [:todos])
+    (subscribe [:showing])]
 
   ;; Computation Function
- (fn [[todos showing] _]   ;; that 1st parameter is a 2-vector of values
-   (let [filter-fn (case showing
-                     :active (complement :done)
-                     :done   :done
-                     :all    identity)]
-     (filter filter-fn todos))))
+ #%1(->> %1     ;; that 1st parameter is a 2-vector of values
+         (filter (case %2
+                   :active (complement :done)
+                   :done :done
+                   :all identity))))
 
 ;; -------------------------------------------------------------------------------------
 ;; Hey, wait on!!
@@ -137,29 +131,25 @@
    :visible-todos
    :<- [:todos]
    :<- [:showing]
-   (fn [[todos showing] _]
-     (let [filter-fn (case showing
-                       :active (complement :done)
-                       :done   :done
-                       :all    identity)]
-       (filter filter-fn todos))))
+   #%1(->> %1
+           (filter (case %2
+                     :active (complement :done)
+                     :done :done
+                     :all identity))))
 
 
 (reg-sub
  :all-complete?
  :<- [:todos]
- (fn [todos _]
-   (every? :done todos)))
+ #%(every? :done %))
 
 (reg-sub
  :completed-count
  :<- [:todos]
- (fn [todos _]
-   (count (filter :done todos))))
+ #%(count (filter :done %)))
 
 (reg-sub
  :footer-counts
  :<- [:todos]
  :<- [:completed-count]
- (fn [[todos completed] _]
-   [(- (count todos) completed) completed]))
+ #%1[(- (count %1) %2) %2])

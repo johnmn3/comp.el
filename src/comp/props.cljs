@@ -17,6 +17,19 @@
          (when (and parent-style child-style)
            {:style (merge parent-style child-style)})))
 
+(defn wrap-props [afn]
+  (if-not afn
+    (fn [env] env #_ {})
+    (if (-> afn meta :wrapped?)
+      afn
+      (with-meta
+        (fn
+          ([props env]
+           (merge env {:props (merge props (afn props env))}))
+          ([env]
+           (merge (:props env) (afn (:props env) env))))
+        {:wrapped? true}))))
+
 (defn props-joiner
   [{parent-props :props
     parent-props-void :props/void
@@ -30,17 +43,17 @@
          (when (and parent-props-void child-props-void)
            {:props/void (vec (set (concat parent-props-void (af/muff child-props-void))))})
          (when (and parent-props-af child-props-af)
-           {:props/af (comp child-props-af parent-props-af)})
+           {:props/af (comp (wrap-props child-props-af) (wrap-props parent-props-af))})
          (when (and parent-props-ef child-props-ef)
-           {:props/ef (comp child-props-ef parent-props-ef)})))
+           {:props/ef (comp (wrap-props child-props-ef) (wrap-props parent-props-ef))})))
 
-(defn wrap-fns [env args]
+(defn wrap-fns [args]
   (->> args
        (mapv (fn [arg]
                (if (fn? arg)
                  (with-meta
-                   (fn [_env]
-                     (arg env))
+                   (fn [& env]
+                     (apply arg env))
                    {:ef/runnable? true})
                  arg)))))
 
@@ -53,22 +66,32 @@
               props-af :props/af}]
           (merge {}
                  (when (seq args)
-                   {:children (vec (concat (or children []) (wrap-fns env args)))
+                   {:children (vec (concat (or children []) (wrap-fns args)))
                     :args []})
                  (when props-af
                    {:props (merge-with-styles
                             props
-                            (props-af props env))})))
+                            (:props
+                             ((wrap-props props-af)
+                              props env)))})))
     :ef (fn [{:as env
               :keys [props args]
               props-ef :props/ef
               :or {props-ef identity}}]
           (let [prop-args? (-> args first map?)
                 merged-props (merge-with-styles props (when prop-args?
-                                                        (first args)))]
+                                                        (first args)))
+                merged-env (merge env
+                                  {:props merged-props}
+                                  (when prop-args?
+                                    {:args (rest args)}))]
             (if-not props-ef
-              {:props merged-props}
-              (let [final-props (merge {:props (merge-with-styles merged-props (props-ef merged-props env))}
-                                       (when prop-args?
-                                         {:args (rest args)}))]
-                final-props))))}))
+              (merge {:props merged-props}
+                     (when prop-args?
+                       {:args (rest args)}))
+              (merge {:props (merge-with-styles
+                              merged-props
+                              (:props ((wrap-props props-ef)
+                                       (:props merged-env) merged-env)))}
+                     (when prop-args?
+                       {:args (rest args)})))))}))

@@ -5,14 +5,11 @@
 (def void-todo
   (void
    {:as ::void-todo
-    :props/void [:id :editing :on-save :on-stop :title :done :selected? :new?]}))
+    :props/void [:id :hover-state :editing :save :stop :on-save :on-stop :title :done :selected? :new?]}))
 
 (def selected?
   (props
    {:as ::selected?
     :props/void [:selected? :on-selected]
-    :props/ef (fn [{:as props :keys [on-selected selected?]}
-                   {:keys [is]}]
-                (-> (merge {:href (str "#/" (some-> is name))}
-                           (when (= is selected?)
-                             ((or on-selected identity) props)))))}))
+    :props/ef #%(when (= %:selected? %2:is)
+                  ((or %:on-selected identity) %1 %2))}))
