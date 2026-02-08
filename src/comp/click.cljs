@@ -17,8 +17,18 @@
     {:props (assoc env-props :on-click #(on-click env))}))
 
 (def click
-  (props
-   {:as ::click
-    :void :on-click
-    :af click-af
-    :ef click-ef}))
+  (-> props
+      (update :id conj ::click)
+      (update :props/void #(into (or % []) [:on-click]))
+      (update :tf-pre conj
+              ::click-af
+              (fn [env]
+                (if-let [result (click-af env)]
+                  (merge env result)
+                  env)))
+      (update :tf conj
+              ::click-ef
+              (fn [env]
+                (if-let [result (click-ef env)]
+                  (merge env result)
+                  env)))))

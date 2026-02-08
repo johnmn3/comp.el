@@ -1,13 +1,16 @@
 (ns comp.props
   (:require
-   [af.fect :as af]))
+   [ti-yong.alpha.transformer :as t]
+   [ti-yong.alpha.util :as u]))
 
 (def void
-  (af/fect
-   {:as ::void
-    :ef-end (fn [{:keys [props]
-                  props-void :props/void}]
-              {:props (apply dissoc props (af/muff props-void))})}))
+  (-> t/transformer
+      (update :id conj ::void)
+      (update :tf conj
+              ::void
+              (fn [{:as env :keys [props]
+                    props-void :props/void}]
+                (assoc env :props (apply dissoc props (u/muff props-void)))))))
 
 (defn merge-with-styles
   [{:as parent-props parent-style :style}
@@ -28,7 +31,7 @@
     child-props-ef :props/ef}]
   (merge {:props (merge-with-styles parent-props child-props)}
          (when (and parent-props-void child-props-void)
-           {:props/void (vec (set (concat parent-props-void (af/muff child-props-void))))})
+           {:props/void (vec (set (concat parent-props-void (u/muff child-props-void))))})
          (when (and parent-props-af child-props-af)
            {:props/af (comp child-props-af parent-props-af)})
          (when (and parent-props-ef child-props-ef)
@@ -45,30 +48,32 @@
                  arg)))))
 
 (def props
-  (void
-   {:as ::props
-    :join props-joiner
-    :af (fn [{:as env
-              :keys [props children args]
-              props-af :props/af}]
-          (merge {}
-                 (when (seq args)
-                   {:children (vec (concat (or children []) (wrap-fns env args)))
-                    :args []})
-                 (when props-af
-                   {:props (merge-with-styles
-                            props
-                            (props-af props env))})))
-    :ef (fn [{:as env
-              :keys [props args]
-              props-ef :props/ef
-              :or {props-ef identity}}]
-          (let [prop-args? (-> args first map?)
-                merged-props (merge-with-styles props (when prop-args?
-                                                        (first args)))]
-            (if-not props-ef
-              {:props merged-props}
-              (let [final-props (merge {:props (merge-with-styles merged-props (props-ef merged-props env))}
-                                       (when prop-args?
-                                         {:args (rest args)}))]
-                final-props))))}))
+  (-> void
+      (update :id conj ::props)
+      (update :tf-pre conj
+              ::props-af
+              (fn [{:as env
+                    :keys [props children args]
+                    props-af :props/af}]
+                (merge env
+                       (when (seq args)
+                         {:children (vec (concat (or children []) (wrap-fns env args)))
+                          :args []})
+                       (when props-af
+                         {:props (merge-with-styles
+                                  props
+                                  (props-af props env))}))))
+      (update :tf conj
+              ::props-ef
+              (fn [{:as env
+                    :keys [props args]
+                    props-ef :props/ef}]
+                (let [prop-args? (-> args first map?)
+                      merged-props (merge-with-styles props (when prop-args?
+                                                              (first args)))]
+                  (if-not props-ef
+                    (assoc env :props merged-props)
+                    (merge env
+                           {:props (merge-with-styles merged-props (props-ef merged-props env))}
+                           (when prop-args?
+                             {:args (rest args)}))))))))

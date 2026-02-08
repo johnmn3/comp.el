@@ -25,15 +25,8 @@
    :font-weight 300
    :color       "#e6e6e6"})
 
-;; (def todo-input
-;;   {:style {:border         0
-;;            :width          "100%"
-;;            :padding-left   20
-;;            :padding-top    8
-;;            :padding-bottom 10}})
-
 (def todo-input
-  (comp/el
+  (comp/derive comp/el
    {:as ::todo-input
     :props {:style {:border         0
                     :width          "100%"
@@ -54,12 +47,12 @@
                                             :box-shadow     "inset 3 -2px 1px rgba(0,0,0,0.03)"})})
 
 (def new-todo
-  (comp/el
+  (comp/derive comp/el
    {:as ::new-todo
     :props new-todo-styles}))
 
 (def edit-todo
-  (comp/el
+  (comp/derive comp/el
    {:as ::edit-todo
     :props {:style/-webkit-input-placeholder placehoder-styles
             :style/-moz-placeholder          placehoder-styles
@@ -124,7 +117,7 @@
            :top              "20px"}})
 
 (def delete-todo
-  (comp/el
+  (comp/derive comp/el
    {:as ::delete-todo
     :props {:style/hover {:color "#af5b5e"}
             :style       {:position   "absolute"
@@ -137,7 +130,7 @@
                           :transition "color 0.2s ease-out"}}}))
 
 (def todo-display
-  (comp/el
+  (comp/derive comp/el
    {:as ::todo-display
     :props (deep-merge
             new-todo-styles
@@ -169,12 +162,12 @@
            :color          "rgba(175, 47, 47, 0.15)"}})
 
 (def todo-header-title
-  (comp/el
+  (comp/derive comp/el
    {:as ::todo-display
     :props todo-header-title-style}))
 
 (def filter-anchor
-  (comp/el
+  (comp/derive comp/el
    {:as ::filter-anchor
     :props {:style/hover {:border-color "rgba(175, 47, 47, 0.1)"}
             :style       {:color           "inherit"

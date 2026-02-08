@@ -32,7 +32,7 @@
        (if-not @editing
          [c/todo-display (assoc todo :editing editing)
           title]
-         [(c/existing-todo
+         [(comp/derive c/existing-todo
            {:as ::edit-existing-todo
             :props {:todo todo
                     :editing editing}})])
@@ -40,7 +40,7 @@
          [c/delete-todo {:is id}])])))
 
 (def todo-list
-  (comp/list-items
+  (comp/derive comp/list-items
    {:as ::todo-list}
    #(let [visible-todos @(subscribe [:visible-todos])]
       (->> visible-todos

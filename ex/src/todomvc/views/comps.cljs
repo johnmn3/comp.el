@@ -22,13 +22,13 @@
       [unchecked {:on-click toggle}])))
 
 (def delete-todo
-  (comp/div
+  (comp/derive comp/div
     {:as ::delete-todo :with [styled/delete-todo a/void-todo]
      :on-click #(dispatch [:delete-todo (:is %)])}
    "×"))
 
 (def todo-display
-  (comp/label
+  (comp/derive comp/label
    {:as ::todo-display :with [styled/todo-display a/void-todo]
     :props/ef (fn [{:as todo :keys [editing]}]
                 (merge {:on-double-click #(reset! editing true)}
@@ -36,7 +36,7 @@
                          styled/todo-done)))}))
 
 (def todo-input
-  (comp/raw-input
+  (comp/derive comp/raw-input
    {:as ::todo-input :with [styled/todo-input a/void-todo]
     :props/void :af-state
     :props/ef (fn [{:keys [on-save on-stop af-state]}]
@@ -54,7 +54,7 @@
                                    nil)}))}))
 
 (def new-todo
-  (todo-input
+  (comp/derive todo-input
    {:as ::new-todo :with styled/new-todo
     :props {:placeholder "What needs to be done?"
             :af-state (r/atom nil)
@@ -62,7 +62,7 @@
                         (dispatch [:add-todo %]))}}))
 
 (def existing-todo
-  (todo-input
+  (comp/derive todo-input
    {:as ::existing-todo :with styled/edit-todo
     :props/af (fn [{:keys [editing]
                     {:keys [id title]} :todo}]
@@ -73,27 +73,27 @@
                  :on-stop #(reset! editing false)})}))
 
 (def todo-header-title
-  (comp/box
+  (comp/derive comp/box
    {:as ::todo-header-title :with styled/todo-header-title}))
 
 (def filter-anchor
-  (comp/a
+  (comp/derive comp/a
    {:as ::a :with [styled/filter-anchor a/selected?]
     :props {:on-selected #(update % :style
                                   assoc :border-color
                                   "rgba(175, 47, 47, 0.2)")}}))
 
 (def filter-all
-  (filter-anchor
+  (comp/derive filter-anchor
    {:as :all :with a/void-todo}
    "All"))
 
 (def filter-active
-  (filter-anchor
+  (comp/derive filter-anchor
    {:as :active :with a/void-todo}
    "Active"))
 
 (def filter-done
-  (filter-anchor
+  (comp/derive filter-anchor
    {:as :done :with a/void-todo}
    "Completed"))

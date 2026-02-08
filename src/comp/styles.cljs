@@ -1,5 +1,5 @@
 (ns comp.styles
-  (:require [af.fect :as af]
+  (:require [ti-yong.alpha.transformer :as t]
             [radiant.reagent :as r]
             [radiant.core :refer [css]]))
 
@@ -27,10 +27,10 @@
   (dispatch-input-placeholder sel k m))
 
 (def radiant
-  (af/fect
-   {:as ::radiant
-    :ef (fn [{:keys [props]}]
-          ;; (println :running-radiant :props props)
-          (let [new-props (r/attrs->css props)]
-            ;; (println :new-props new-props)
-            {:props new-props}))}))
+  (-> t/transformer
+      (update :id conj ::radiant)
+      (update :tf conj
+              ::radiant
+              (fn [{:as env :keys [props]}]
+                (let [new-props (r/attrs->css props)]
+                  (assoc env :props new-props))))))
