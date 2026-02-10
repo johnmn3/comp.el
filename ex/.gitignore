@@ -3,3 +3,7 @@ resources/public/js
 .clj-kondo/
 .calva/
 node_modules
+package-lock.json
+.proxy-java-shim.env
+.proxy-shim.pid
+script/
