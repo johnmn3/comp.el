@@ -4,6 +4,7 @@
    [clojure.string :as str]
    [reagent.core :as r]
    [comp.el :as comp]
+   [comp.props :as p]
    [todomvc.views.affects :as a]
    [todomvc.views.styled :as styled]))
 
@@ -22,24 +23,31 @@
       [unchecked {:on-click toggle}])))
 
 (def delete-todo
-  (comp/derive comp/div
-    {:as ::delete-todo :with [styled/delete-todo a/void-todo]
-     :on-click #(dispatch [:delete-todo (:is %)])}
-   "×"))
+  (-> comp/div
+      (update :id conj ::delete-todo)
+      (update :with conj styled/delete-todo a/void-todo)
+      (assoc :on-click #(dispatch [:delete-todo (:is %)]))
+      (update :args conj "×")))
 
 (def todo-display
-  (comp/derive comp/label
-   {:as ::todo-display :with [styled/todo-display a/void-todo]
-    :props/ef (fn [{:as todo :keys [editing]}]
+  (-> comp/label
+      (update :id conj ::todo-display)
+      (update :with conj styled/todo-display a/void-todo)
+      (update :props/tf conj
+              ::todo-display
+              (fn [{:as todo :keys [editing]}]
                 (merge {:on-double-click #(reset! editing true)}
                        (when (:done todo)
-                         styled/todo-done)))}))
+                         styled/todo-done))))))
 
 (def todo-input
-  (comp/derive comp/raw-input
-   {:as ::todo-input :with [styled/todo-input a/void-todo]
-    :props/void :af-state
-    :props/ef (fn [{:keys [on-save on-stop af-state]}]
+  (-> comp/raw-input
+      (update :id conj ::todo-input)
+      (update :with conj styled/todo-input a/void-todo)
+      (update :props/void #(into (or % []) [:af-state]))
+      (update :props/tf conj
+              ::todo-input
+              (fn [{:keys [on-save on-stop af-state]}]
                 (let [stop #(do (reset! af-state "")
                                 (when on-stop (on-stop)))
                       save #(do (on-save (some-> af-state deref str str/trim))
@@ -51,49 +59,59 @@
                    :on-key-down #(case (.-which %)
                                    13 (save)
                                    27 (stop)
-                                   nil)}))}))
+                                   nil)})))))
 
 (def new-todo
-  (comp/derive todo-input
-   {:as ::new-todo :with styled/new-todo
-    :props {:placeholder "What needs to be done?"
-            :af-state (r/atom nil)
-            :on-save #(when (seq %)
-                        (dispatch [:add-todo %]))}}))
+  (-> todo-input
+      (update :id conj ::new-todo)
+      (update :with conj styled/new-todo)
+      (update :props p/merge-with-styles
+              {:placeholder "What needs to be done?"
+               :af-state (r/atom nil)
+               :on-save #(when (seq %)
+                           (dispatch [:add-todo %]))})))
 
 (def existing-todo
-  (comp/derive todo-input
-   {:as ::existing-todo :with styled/edit-todo
-    :props/af (fn [{:keys [editing]
+  (-> todo-input
+      (update :id conj ::existing-todo)
+      (update :with conj styled/edit-todo)
+      (update :props/tf-pre conj
+              ::existing-todo
+              (fn [{:keys [editing]
                     {:keys [id title]} :todo}]
                 {:af-state (r/atom title)
                  :on-save #(if (seq %)
                              (dispatch [:save id %])
                              (dispatch [:delete-todo id]))
-                 :on-stop #(reset! editing false)})}))
+                 :on-stop #(reset! editing false)}))))
 
 (def todo-header-title
-  (comp/derive comp/box
-   {:as ::todo-header-title :with styled/todo-header-title}))
+  (-> comp/box
+      (update :id conj ::todo-header-title)
+      (update :with conj styled/todo-header-title)))
 
 (def filter-anchor
-  (comp/derive comp/a
-   {:as ::a :with [styled/filter-anchor a/selected?]
-    :props {:on-selected #(update % :style
-                                  assoc :border-color
-                                  "rgba(175, 47, 47, 0.2)")}}))
+  (-> comp/a
+      (update :id conj ::filter-anchor)
+      (update :with conj styled/filter-anchor a/selected?)
+      (assoc-in [:props :on-selected]
+                #(update % :style assoc :border-color
+                         "rgba(175, 47, 47, 0.2)"))))
 
 (def filter-all
-  (comp/derive filter-anchor
-   {:as :all :with a/void-todo}
-   "All"))
+  (-> filter-anchor
+      (update :id conj :all)
+      (update :with conj a/void-todo)
+      (update :args conj "All")))
 
 (def filter-active
-  (comp/derive filter-anchor
-   {:as :active :with a/void-todo}
-   "Active"))
+  (-> filter-anchor
+      (update :id conj :active)
+      (update :with conj a/void-todo)
+      (update :args conj "Active")))
 
 (def filter-done
-  (comp/derive filter-anchor
-   {:as :done :with a/void-todo}
-   "Completed"))
+  (-> filter-anchor
+      (update :id conj :done)
+      (update :with conj a/void-todo)
+      (update :args conj "Completed")))

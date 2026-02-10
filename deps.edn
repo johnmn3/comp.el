@@ -2,7 +2,6 @@
  :deps {reagent/reagent             {:mvn/version "1.1.0"}
         re-frame/re-frame           {:mvn/version "1.3.0-rc3"}
         arttuka/reagent-material-ui {:mvn/version "5.6.2-1"}
-        io.github.johnmn3/ti-yong   {:git/url "https://github.com/johnmn3/ti-yong.git"
-                                     :sha     "4a101a78b81133c474cf30df2dc18d77270c42d6"}
+        io.github.johnmn3/ti-yong   {:local/root "/tmp/ti-yong-local"}
         BrianChevalier/radiant      {:git/url "https://github.com/johnmn3/radiant.git"
                                      :sha     "20e5dedd09275f27b2146a629a0b92078963db7b"}}}

@@ -1,6 +1,7 @@
 (ns todomvc.views
   (:require
    [comp.el :as comp]
+   [comp.props :as p]
    [todomvc.views.comps :as c]
    [todomvc.views.styled :as styled]
    [reagent.core :as reagent]
@@ -32,21 +33,23 @@
        (if-not @editing
          [c/todo-display (assoc todo :editing editing)
           title]
-         [(comp/derive c/existing-todo
-           {:as ::edit-existing-todo
-            :props {:todo todo
-                    :editing editing}})])
+         [(-> c/existing-todo
+              (update :id conj ::edit-existing-todo)
+              (update :props p/merge-with-styles
+                      {:todo todo
+                       :editing editing}))])
        (when @hover-state
          [c/delete-todo {:is id}])])))
 
 (def todo-list
-  (comp/derive comp/list-items
-   {:as ::todo-list}
-   #(let [visible-todos @(subscribe [:visible-todos])]
-      (->> visible-todos
-           (mapv (fn [x] [todo-item {:todo x}]))
-           (interpose [comp/divider])
-           (into [[comp/divider]])))))
+  (-> comp/list-items
+      (update :id conj ::todo-list)
+      (update :args conj
+              #(let [visible-todos @(subscribe [:visible-todos])]
+                 (->> visible-todos
+                      (mapv (fn [x] [todo-item {:todo x}]))
+                      (interpose [comp/divider])
+                      (into [[comp/divider]]))))))
 
 (defn footer-selectors []
   (let [showing @(subscribe [:showing])]

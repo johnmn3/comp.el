@@ -1,6 +1,7 @@
 (ns todomvc.views.styled
   (:require
-   [comp.el :as comp]))
+   [comp.el :as comp]
+   [comp.props :as p]))
 
 (defn deep-merge [& maps]
   (apply merge-with
@@ -26,13 +27,14 @@
    :color       "#e6e6e6"})
 
 (def todo-input
-  (comp/derive comp/el
-   {:as ::todo-input
-    :props {:style {:border         0
-                    :width          "100%"
-                    :padding-left   20
-                    :padding-top    8
-                    :padding-bottom 10}}}))
+  (-> comp/el
+      (update :id conj ::todo-input)
+      (update :props p/merge-with-styles
+              {:style {:border         0
+                       :width          "100%"
+                       :padding-left   20
+                       :padding-top    8
+                       :padding-bottom 10}})))
 
 (def new-todo-styles
   {:style/-webkit-input-placeholder placehoder-styles
@@ -47,27 +49,28 @@
                                             :box-shadow     "inset 3 -2px 1px rgba(0,0,0,0.03)"})})
 
 (def new-todo
-  (comp/derive comp/el
-   {:as ::new-todo
-    :props new-todo-styles}))
+  (-> comp/el
+      (update :id conj ::new-todo)
+      (update :props p/merge-with-styles new-todo-styles)))
 
 (def edit-todo
-  (comp/derive comp/el
-   {:as ::edit-todo
-    :props {:style/-webkit-input-placeholder placehoder-styles
-            :style/-moz-placeholder          placehoder-styles
-            :style/input-placeholder         placehoder-styles
-            :style
-            (merge new-todo-common
-                   {:width          "100%"
-                    :font-weight    300
-                    :border         0
-                    :color          "#0f0f0f"
-                    :font           "16px 'Helvetica Neue', Helvetica, Arial, sans-serif"
-                    :padding-top    12
-                    :padding-left   20
-                    :padding-bottom 13
-                    :box-shadow     "inset 3 -2px 1px rgba(0,0,0,0.03)"})}}))
+  (-> comp/el
+      (update :id conj ::edit-todo)
+      (update :props p/merge-with-styles
+              {:style/-webkit-input-placeholder placehoder-styles
+               :style/-moz-placeholder          placehoder-styles
+               :style/input-placeholder         placehoder-styles
+               :style
+               (merge new-todo-common
+                      {:width          "100%"
+                       :font-weight    300
+                       :border         0
+                       :color          "#0f0f0f"
+                       :font           "16px 'Helvetica Neue', Helvetica, Arial, sans-serif"
+                       :padding-top    12
+                       :padding-left   20
+                       :padding-bottom 13
+                       :box-shadow     "inset 3 -2px 1px rgba(0,0,0,0.03)"})})))
 
 (def circle
   {:style {:width              "1.7em"
@@ -96,8 +99,8 @@
            :font-size          "large"}})
 
 (def check
-  {:style {:-ms-transform     "rotate(45deg)"; /* IE 9 */
-           :-webkit-transform "rotate(45deg)"; /* Chrome, Safari, Opera */
+  {:style {:-ms-transform     "rotate(45deg)"
+           :-webkit-transform "rotate(45deg)"
            :transform         "rotate(45deg)"}})
 
 (def check-leg
@@ -117,33 +120,35 @@
            :top              "20px"}})
 
 (def delete-todo
-  (comp/derive comp/el
-   {:as ::delete-todo
-    :props {:style/hover {:color "#af5b5e"}
-            :style       {:position   "absolute"
-                          :right      0
-                          :bottom     10
-                          :width      "40px"
-                          :height     "40px"
-                          :font-size  "30px"
-                          :color      "#cc9a9a"
-                          :transition "color 0.2s ease-out"}}}))
+  (-> comp/el
+      (update :id conj ::delete-todo)
+      (update :props p/merge-with-styles
+              {:style/hover {:color "#af5b5e"}
+               :style       {:position   "absolute"
+                              :right      0
+                              :bottom     10
+                              :width      "40px"
+                              :height     "40px"
+                              :font-size  "30px"
+                              :color      "#cc9a9a"
+                              :transition "color 0.2s ease-out"}})))
 
 (def todo-display
-  (comp/derive comp/el
-   {:as ::todo-display
-    :props (deep-merge
-            new-todo-styles
-            {:style (merge
-                     new-todo-common
-                     {:color          "#4d4d4d"
-                      :font           "14px 'Helvetica Neue', Helvetica, Arial, sans-serif"
-                      :font-weight    300
-                      :width          "100%"
-                      :padding-top    12
-                      :padding-bottom 13
-                      :padding-left   20
-                      :transition     "color 0.4s"})})}))
+  (-> comp/el
+      (update :id conj ::todo-display)
+      (update :props p/merge-with-styles
+              (deep-merge
+               new-todo-styles
+               {:style (merge
+                        new-todo-common
+                        {:color          "#4d4d4d"
+                         :font           "14px 'Helvetica Neue', Helvetica, Arial, sans-serif"
+                         :font-weight    300
+                         :width          "100%"
+                         :padding-top    12
+                         :padding-bottom 13
+                         :padding-left   20
+                         :transition     "color 0.4s"})}))))
 
 (def todo-item
   {:style {:padding-left  8
@@ -153,7 +158,6 @@
   {:style {:text-decoration "line-through"
            :color           "#d9d9d9"}})
 
-
 (def todo-header-title-style
   {:style {:padding-bottom 50
            :text-align     "center"
@@ -162,22 +166,23 @@
            :color          "rgba(175, 47, 47, 0.15)"}})
 
 (def todo-header-title
-  (comp/derive comp/el
-   {:as ::todo-display
-    :props todo-header-title-style}))
+  (-> comp/el
+      (update :id conj ::todo-header-title)
+      (update :props p/merge-with-styles todo-header-title-style)))
 
 (def filter-anchor
-  (comp/derive comp/el
-   {:as ::filter-anchor
-    :props {:style/hover {:border-color "rgba(175, 47, 47, 0.1)"}
-            :style       {:color           "inherit"
-                          :cursor          "pointer"
-                          :margin          "3px"
-                          :padding         "3px 7px"
-                          :text-decoration "none"
-                          :border          "1px solid transparent"
-                          :border-color    "rgba(175, 47, 47, 0.0)"
-                          :border-radius   "3px"}}}))
+  (-> comp/el
+      (update :id conj ::filter-anchor)
+      (update :props p/merge-with-styles
+              {:style/hover {:border-color "rgba(175, 47, 47, 0.1)"}
+               :style       {:color           "inherit"
+                              :cursor          "pointer"
+                              :margin          "3px"
+                              :padding         "3px 7px"
+                              :text-decoration "none"
+                              :border          "1px solid transparent"
+                              :border-color    "rgba(175, 47, 47, 0.0)"
+                              :border-radius   "3px"}})))
 
 (def footer-controls
   {:style {:color         "#777"

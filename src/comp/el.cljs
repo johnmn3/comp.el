@@ -40,7 +40,6 @@
    [reagent-mui.material.paper :as mui-paper]
    [reagent-mui.material.text-field :as mui-text-field]
    [ti-yong.alpha.transformer :as t]
-   [ti-yong.alpha.util :as u]
    [comp.click :as c]
    [comp.styles :as s]
    [comp.props :as p]))
@@ -54,37 +53,11 @@
 (def styled
   styles/styled)
 
-(defn derive
-  "Derive a new transformer from a parent, merging a config map.
-   Config keys:
-     :as        - keyword appended to :id vector
-     :with      - transformer(s) appended to :with vector
-     :props     - map merged into parent :props via merge-with-styles
-     :props/void - key(s) accumulated into :props/void
-     :props/af  - function stored as :props/af
-     :props/ef  - function stored as :props/ef
-   All other keys are assoc'd directly into the transformer.
-   Additional args after config are stored in :args."
-  [parent config & args]
-  (let [{id :as
-         with-val :with
-         props-val :props
-         void-val :props/void} config
-        rest-config (dissoc config :as :with :props :props/void)
-        with-vec (when with-val
-                   (if (sequential? with-val) (vec with-val) [with-val]))]
-    (cond-> (reduce-kv assoc parent rest-config)
-      id        (update :id conj id)
-      with-vec  (update :with into with-vec)
-      props-val (update :props #(p/merge-with-styles (or % {}) props-val))
-      void-val  (update :props/void #(into (or % []) (u/muff void-val)))
-      (seq args) (update :args into (vec args)))))
-
-(defn form-1-or-2 [{:as env :keys [pre-state props args]} & _effect-args]
+(defn form-1-or-2 [{:as env :keys [props args]} & _effect-args]
   (let [props (or props {})
         component (:comp props :<>)
         [props args] (if (map? (first args))
-                       [(merge props (first args)) (rest args)]
+                       [(p/merge-with-styles props (first args)) (rest args)]
                        [props args])]
     (into [component (dissoc props :comp)] args)))
 
@@ -94,47 +67,47 @@
       (update :with into [s/radiant c/click p/props p/void])
       (assoc :env-op form-1-or-2)))
 
-(def div          (derive el {:as ::div          :props {:comp :div}}))
-(def input        (derive el {:as ::input        :props {:comp mui-text-field/text-field}}))
-(def raw-input    (derive el {:as ::input        :props {:comp :input}}))
-(def box          (derive el {:as ::box          :props {:comp mui-box/box}}))
-(def paper        (derive el {:as ::paper        :props {:comp mui-paper/paper}}))
-(def list-items   (derive el {:as ::list-items   :props {:disable-padding true :comp mui-list/list}}))
-(def list-item    (derive el {:as ::list-item    :props {:disable-padding true :comp mui-list-item/list-item}}))
-(def divider      (derive el {:as ::divider      :props {:comp mui-divider/divider}}))
-(def grid         (derive el {:as ::grid         :props {:comp mui-grid/grid}}))
-(def container    (derive grid {:as ::container  :props {:container true}}))
-(def item         (derive grid {:as ::item       :props {:item true}}))
-(def arrow-down   (derive el {:as ::keyboard-arrow-down :props {:comp keyboard-arrow-down}}))
-(def label        (derive el {:as ::label        :props {:comp :label}}))
-(def a            (derive el {:as ::a            :props {:comp :a}}))
-(def app-bar      (derive el {:as ::app-bar      :props {:comp App-bar/app-bar}}))
-(def toolbar      (derive el {:as ::toolbar      :props {:comp Toolbar/toolbar}}))
-(def css-baseline (derive el {:as ::css-baseline :props {:comp Css-baseline/css-baseline}}))
-(def stack        (derive el {:as ::stack        :props {:comp mui-stack/stack}}))
-(def notifications (derive el {:as ::notifications :props {:comp mui-notifications/notifications}}))
-(def exit-to-app  (derive el {:as ::exit-to-app  :props {:comp mui-exit-to-app/exit-to-app}}))
-(def avatar       (derive el {:as ::avatar       :props {:comp mui-avatar/avatar}}))
-(def icon-button  (derive el {:as ::icon-button  :props {:comp mui-icon-button/icon-button}}))
-(def menu         (derive el {:as ::menu         :props {:comp mui-menu/menu}}))
-(def menu-item    (derive el {:as ::menu-item    :props {:comp mui-menu-item/menu-item}}))
-(def menu-icon    (derive el {:as ::menu-icon    :props {:comp mui-menu-icon/menu}}))
-(def lock-icon    (derive el {:as ::lock-icon    :props {:comp mui-lock/lock}}))
-(def text         (derive el {:as ::text         :props {:comp mui-typography/typography}}))
-(def badge        (derive el {:as ::badge        :props {:comp mui-badge/badge}}))
-(def drawer       (derive el {:as ::drawer       :props {:comp mui-drawer/drawer}}))
-(def list-item-icon (derive el {:as ::list-item-icon :props {:comp mui-list-item-icon/list-item-icon}}))
-(def account-circle (derive el {:as ::account-circle :props {:comp mui-account-circle/account-circle}}))
-(def list-item-text (derive el {:as ::list-item-text :props {:comp mui-list-item-text/list-item-text}}))
-(def switch       (derive el {:as ::switch       :props {:comp mui-switch/switch}}))
-(def home         (derive el {:as ::home         :props {:comp mui-home/home}}))
-(def button       (derive el {:as ::button       :props {:comp mui-button/button}}))
-(def link         (derive el {:as ::link         :props {:comp mui-link/link}}))
-(def table        (derive el {:as ::table        :props {:comp mui-table/table}}))
-(def table-head   (derive el {:as ::table-head   :props {:comp mui-table-head/table-head}}))
-(def table-body   (derive el {:as ::table-body   :props {:comp mui-table-body/table-body}}))
-(def table-row    (derive el {:as ::table-row    :props {:comp mui-table-row/table-row}}))
-(def table-cell   (derive el {:as ::table-cell   :props {:comp mui-table-cell/table-cell}}))
-(def grid-container (derive el {:as ::grid-container :props {:comp mui-container/container}}))
-(def checkbox     (derive el {:as ::checkbox     :props {:comp mui-checkbox/checkbox}}))
-(def form-control-label (derive el {:as ::form-control-label :props {:comp mui-form-control-label/form-control-label}}))
+(def div          (-> el (update :id conj ::div)          (assoc-in [:props :comp] :div)))
+(def input        (-> el (update :id conj ::input)        (assoc-in [:props :comp] mui-text-field/text-field)))
+(def raw-input    (-> el (update :id conj ::raw-input)    (assoc-in [:props :comp] :input)))
+(def box          (-> el (update :id conj ::box)          (assoc-in [:props :comp] mui-box/box)))
+(def paper        (-> el (update :id conj ::paper)        (assoc-in [:props :comp] mui-paper/paper)))
+(def list-items   (-> el (update :id conj ::list-items)   (assoc-in [:props :comp] mui-list/list) (assoc-in [:props :disable-padding] true)))
+(def list-item    (-> el (update :id conj ::list-item)    (assoc-in [:props :comp] mui-list-item/list-item) (assoc-in [:props :disable-padding] true)))
+(def divider      (-> el (update :id conj ::divider)      (assoc-in [:props :comp] mui-divider/divider)))
+(def grid         (-> el (update :id conj ::grid)         (assoc-in [:props :comp] mui-grid/grid)))
+(def container    (-> grid (update :id conj ::container)  (assoc-in [:props :container] true)))
+(def item         (-> grid (update :id conj ::item)       (assoc-in [:props :item] true)))
+(def arrow-down   (-> el (update :id conj ::arrow-down)   (assoc-in [:props :comp] keyboard-arrow-down)))
+(def label        (-> el (update :id conj ::label)        (assoc-in [:props :comp] :label)))
+(def a            (-> el (update :id conj ::a)            (assoc-in [:props :comp] :a)))
+(def app-bar      (-> el (update :id conj ::app-bar)      (assoc-in [:props :comp] App-bar/app-bar)))
+(def toolbar      (-> el (update :id conj ::toolbar)      (assoc-in [:props :comp] Toolbar/toolbar)))
+(def css-baseline (-> el (update :id conj ::css-baseline) (assoc-in [:props :comp] Css-baseline/css-baseline)))
+(def stack        (-> el (update :id conj ::stack)        (assoc-in [:props :comp] mui-stack/stack)))
+(def notifications (-> el (update :id conj ::notifications) (assoc-in [:props :comp] mui-notifications/notifications)))
+(def exit-to-app  (-> el (update :id conj ::exit-to-app)  (assoc-in [:props :comp] mui-exit-to-app/exit-to-app)))
+(def avatar       (-> el (update :id conj ::avatar)       (assoc-in [:props :comp] mui-avatar/avatar)))
+(def icon-button  (-> el (update :id conj ::icon-button)  (assoc-in [:props :comp] mui-icon-button/icon-button)))
+(def menu         (-> el (update :id conj ::menu)         (assoc-in [:props :comp] mui-menu/menu)))
+(def menu-item    (-> el (update :id conj ::menu-item)    (assoc-in [:props :comp] mui-menu-item/menu-item)))
+(def menu-icon    (-> el (update :id conj ::menu-icon)    (assoc-in [:props :comp] mui-menu-icon/menu)))
+(def lock-icon    (-> el (update :id conj ::lock-icon)    (assoc-in [:props :comp] mui-lock/lock)))
+(def text         (-> el (update :id conj ::text)         (assoc-in [:props :comp] mui-typography/typography)))
+(def badge        (-> el (update :id conj ::badge)        (assoc-in [:props :comp] mui-badge/badge)))
+(def drawer       (-> el (update :id conj ::drawer)       (assoc-in [:props :comp] mui-drawer/drawer)))
+(def list-item-icon (-> el (update :id conj ::list-item-icon) (assoc-in [:props :comp] mui-list-item-icon/list-item-icon)))
+(def account-circle (-> el (update :id conj ::account-circle) (assoc-in [:props :comp] mui-account-circle/account-circle)))
+(def list-item-text (-> el (update :id conj ::list-item-text) (assoc-in [:props :comp] mui-list-item-text/list-item-text)))
+(def switch       (-> el (update :id conj ::switch)       (assoc-in [:props :comp] mui-switch/switch)))
+(def home         (-> el (update :id conj ::home)         (assoc-in [:props :comp] mui-home/home)))
+(def button       (-> el (update :id conj ::button)       (assoc-in [:props :comp] mui-button/button)))
+(def link         (-> el (update :id conj ::link)         (assoc-in [:props :comp] mui-link/link)))
+(def table        (-> el (update :id conj ::table)        (assoc-in [:props :comp] mui-table/table)))
+(def table-head   (-> el (update :id conj ::table-head)   (assoc-in [:props :comp] mui-table-head/table-head)))
+(def table-body   (-> el (update :id conj ::table-body)   (assoc-in [:props :comp] mui-table-body/table-body)))
+(def table-row    (-> el (update :id conj ::table-row)    (assoc-in [:props :comp] mui-table-row/table-row)))
+(def table-cell   (-> el (update :id conj ::table-cell)   (assoc-in [:props :comp] mui-table-cell/table-cell)))
+(def grid-container (-> el (update :id conj ::grid-container) (assoc-in [:props :comp] mui-container/container)))
+(def checkbox     (-> el (update :id conj ::checkbox)     (assoc-in [:props :comp] mui-checkbox/checkbox)))
+(def form-control-label (-> el (update :id conj ::form-control-label) (assoc-in [:props :comp] mui-form-control-label/form-control-label)))

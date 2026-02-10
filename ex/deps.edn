@@ -10,8 +10,7 @@
         day8.re-frame/re-frame-10x  {:mvn/version "1.2.0"}
         day8/shadow-git-inject      {:mvn/version "0.0.5"}
         johnmn3/comp.el             {:local/root "../"}
-        io.github.johnmn3/ti-yong   {:git/url "https://github.com/johnmn3/ti-yong.git"
-                                     :sha     "4a101a78b81133c474cf30df2dc18d77270c42d6"}
+        io.github.johnmn3/ti-yong   {:local/root "/tmp/ti-yong-local"}
         BrianChevalier/radiant      {:git/url "https://github.com/johnmn3/radiant.git"
                                      :sha     "20e5dedd09275f27b2146a629a0b92078963db7b"}}
  :aliases
