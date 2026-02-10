@@ -7,3 +7,5 @@ package-lock.json
 .proxy-java-shim.env
 .proxy-shim.pid
 script/
+test-results/
+playwright-report/
