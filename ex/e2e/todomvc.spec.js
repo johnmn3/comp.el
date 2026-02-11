@@ -108,8 +108,8 @@ test.describe('TodoMVC - comp.el', () => {
       await addTodo(page, 'Todo B');
       await addTodo(page, 'Todo C');
 
-      // Click the toggle-all arrow icon
-      const toggleAll = page.locator('[data-testid="KeyboardArrowDownIcon"]').first();
+      // Click the toggle-all arrow icon (MUI grid item containing the SVG)
+      const toggleAll = page.locator('.MuiGrid-grid-xs-1').first();
       await toggleAll.click();
 
       // All todos should be completed (line-through)
@@ -184,7 +184,8 @@ test.describe('TodoMVC - comp.el', () => {
 
       const editInput = page.locator('input[value="Blur save"]');
       await editInput.fill('Blurred');
-      await editInput.blur();
+      // After fill changes value, use updated locator for blur
+      await page.locator('input[value="Blurred"]').blur();
 
       await expect(page.locator('text=Blurred')).toBeVisible();
     });
@@ -196,7 +197,8 @@ test.describe('TodoMVC - comp.el', () => {
 
       const editInput = page.locator('input[value="Remove via edit"]');
       await editInput.fill('');
-      await editInput.press('Enter');
+      // After clearing, press Enter via keyboard (locator value changed)
+      await page.keyboard.press('Enter');
 
       await expect(page.locator('text=Remove via edit')).toHaveCount(0);
     });

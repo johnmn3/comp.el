@@ -26,8 +26,7 @@
   (-> comp/div
       (update :id conj ::delete-todo)
       (update :with conj styled/delete-todo a/void-todo)
-      (assoc :on-click #(dispatch [:delete-todo (:is %)]))
-      (update :args conj "×")))
+      (assoc :on-click #(dispatch [:delete-todo (:is %)]))))
 
 (def todo-display
   (-> comp/label
@@ -77,13 +76,20 @@
       (update :with conj styled/edit-todo)
       (update :props/tf-pre conj
               ::existing-todo
-              (fn [{:keys [editing]
+              (fn [{:keys [editing af-state]
                     {:keys [id title]} :todo}]
-                {:af-state (r/atom title)
-                 :on-save #(if (seq %)
-                             (dispatch [:save id %])
-                             (dispatch [:delete-todo id]))
-                 :on-stop #(reset! editing false)}))))
+                ;; Use provided af-state if available (persistent atom from form-2
+                ;; outer let), falling back to creating a new one. Initialize
+                ;; the persistent atom to title when entering edit mode.
+                (let [state (or af-state (r/atom title))]
+                  (when (nil? @state)
+                    (reset! state title))
+                  {:af-state state
+                   :on-save #(if (seq %)
+                               (dispatch [:save id %])
+                               (dispatch [:delete-todo id]))
+                   :on-stop #(do (reset! state nil)
+                                 (reset! editing false))})))))
 
 (def todo-header-title
   (-> comp/box
@@ -100,18 +106,18 @@
 
 (def filter-all
   (-> filter-anchor
-      (update :id conj :all)
-      (update :with conj a/void-todo)
-      (update :args conj "All")))
+      (update :id conj ::all)
+      (assoc :is :all)
+      (update :with conj a/void-todo)))
 
 (def filter-active
   (-> filter-anchor
-      (update :id conj :active)
-      (update :with conj a/void-todo)
-      (update :args conj "Active")))
+      (update :id conj ::active)
+      (assoc :is :active)
+      (update :with conj a/void-todo)))
 
 (def filter-done
   (-> filter-anchor
-      (update :id conj :done)
-      (update :with conj a/void-todo)
-      (update :args conj "Completed")))
+      (update :id conj ::done)
+      (assoc :is :done)
+      (update :with conj a/void-todo)))

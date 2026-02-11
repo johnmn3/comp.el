@@ -23,7 +23,11 @@
 
 (defn todo-item []
   (let [editing (reagent/atom false)
-        hover-state (reagent/atom false)]
+        hover-state (reagent/atom false)
+        ;; Persistent atom - survives across re-renders (form-2 outer let).
+        ;; existing-todo's ::existing-todo tf-pre will use this instead of
+        ;; creating a new atom each render.
+        af-state (reagent/atom nil)]
     (fn [{{:as todo :keys [id title]} :todo}]
       [comp/list-item
        (merge styled/todo-item
@@ -37,9 +41,10 @@
               (update :id conj ::edit-existing-todo)
               (update :props p/merge-with-styles
                       {:todo todo
-                       :editing editing}))])
+                       :editing editing
+                       :af-state af-state}))])
        (when @hover-state
-         [c/delete-todo {:is id}])])))
+         [c/delete-todo {:is id} "×"])])))
 
 (def todo-list
   (-> comp/list-items
@@ -55,11 +60,11 @@
   (let [showing @(subscribe [:showing])]
     [comp/container
      [comp/item {:xs 3}
-      [c/filter-all {:selected? showing}]]
+      [c/filter-all {:selected? showing} "All"]]
      [comp/item {:xs 5}
-      [c/filter-active {:selected? showing}]]
+      [c/filter-active {:selected? showing} "Active"]]
      [comp/item {:xs 4}
-      [c/filter-done {:selected? showing}]]]))
+      [c/filter-done {:selected? showing} "Completed"]]]))
 
 (defn footer-controls []
   (let [[active done] @(subscribe [:footer-counts])]

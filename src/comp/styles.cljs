@@ -26,11 +26,13 @@
   [sel k m]
   (dispatch-input-placeholder sel k m))
 
+(defn radiant-tf
+  "Processes CSS styles via radiant."
+  [{:as env :keys [props]}]
+  (let [new-props (r/attrs->css props)]
+    (assoc env :props new-props)))
+
 (def radiant
   (-> t/transformer
       (update :id conj ::radiant)
-      (update :tf conj
-              ::radiant
-              (fn [{:as env :keys [props]}]
-                (let [new-props (r/attrs->css props)]
-                  (assoc env :props new-props))))))
+      (update :tf conj ::radiant radiant-tf)))

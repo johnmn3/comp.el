@@ -58,13 +58,32 @@
         component (:comp props :<>)
         [props args] (if (map? (first args))
                        [(p/merge-with-styles props (first args)) (rest args)]
-                       [props args])]
+                       [props args])
+        ;; Evaluate runnable function args (wrapped by wrap-fns)
+        args (mapcat (fn [a]
+                       (if (and (fn? a) (:ef/runnable? (meta a)))
+                         (let [result (a env)]
+                           (if (sequential? result) result [result]))
+                         [a]))
+                     args)]
     (into [component (dissoc props :comp)] args)))
 
 (def el
   (-> t/transformer
       (update :id conj ::el)
-      (update :with into [s/radiant c/click p/props p/void])
+      (assoc :props/void [] :props/tf-pre [] :props/tf [])
+      (update :with into [p/void p/props c/click s/radiant])
+      ;; Authoritative :tf pipeline ordering for ALL el-derived components.
+      ;; Since el's own data is always LAST in combine's dedup (plain-env-data
+      ;; is appended after :with entries), these entries always win regardless
+      ;; of what :with entries contribute. This prevents :with entries that
+      ;; extend props/click from displacing pipeline positions.
+      (assoc :tf [::p/props-tf-pre p/props-tf-pre-fn
+                  ::p/props-tf     p/props-tf-fn
+                  ::c/click-af     c/click-af-tf
+                  ::p/void         p/void-tf
+                  ::c/click-ef     c/click-ef-tf
+                  ::s/radiant      s/radiant-tf])
       (assoc :env-op form-1-or-2)))
 
 (def div          (-> el (update :id conj ::div)          (assoc-in [:props :comp] :div)))
